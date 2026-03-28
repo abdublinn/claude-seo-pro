@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Crawl data (generated at runtime)
+/tmp/
+crawl_data.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Audit reports (generated at runtime)
+SEO-Audit_*.md
+SEO-Crawl_*.md
+SEO-Action-Plan_*.md
+screenshots/

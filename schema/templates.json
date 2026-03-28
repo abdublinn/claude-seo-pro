@@ -1,0 +1,173 @@
+{
+  "Organization": {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{name}}",
+    "url": "{{url}}",
+    "logo": "{{logo_url}}",
+    "description": "{{description}}",
+    "telephone": "{{phone}}",
+    "email": "{{email}}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{street}}",
+      "addressLocality": "{{city}}",
+      "addressRegion": "{{region}}",
+      "postalCode": "{{zip}}",
+      "addressCountry": "{{country}}"
+    },
+    "sameAs": ["{{social_url_1}}", "{{social_url_2}}"]
+  },
+  "LocalBusiness": {
+    "@context": "https://schema.org",
+    "@type": "{{subtype|LocalBusiness}}",
+    "name": "{{name}}",
+    "url": "{{url}}",
+    "logo": "{{logo_url}}",
+    "image": "{{image_url}}",
+    "description": "{{description}}",
+    "telephone": "{{phone}}",
+    "email": "{{email}}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{street}}",
+      "addressLocality": "{{city}}",
+      "addressRegion": "{{region}}",
+      "postalCode": "{{zip}}",
+      "addressCountry": "{{country}}"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "{{lat}}",
+      "longitude": "{{lng}}"
+    },
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+      "opens": "{{opens}}",
+      "closes": "{{closes}}"
+    }],
+    "priceRange": "{{price_range}}",
+    "paymentAccepted": "{{payment_methods}}",
+    "sameAs": ["{{social_url_1}}", "{{social_url_2}}"]
+  },
+  "Product": {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{name}}",
+    "description": "{{description}}",
+    "image": ["{{image_url}}"],
+    "brand": {
+      "@type": "Brand",
+      "name": "{{brand}}"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "{{price}}",
+      "priceCurrency": "RUB",
+      "availability": "https://schema.org/InStock",
+      "url": "{{url}}",
+      "seller": {
+        "@type": "Organization",
+        "name": "{{seller_name}}"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{rating}}",
+      "reviewCount": "{{review_count}}",
+      "bestRating": "5"
+    }
+  },
+  "Article": {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{title}}",
+    "description": "{{description}}",
+    "image": "{{image_url}}",
+    "datePublished": "{{date_published}}",
+    "dateModified": "{{date_modified}}",
+    "author": {
+      "@type": "Person",
+      "name": "{{author_name}}",
+      "url": "{{author_url}}"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{publisher_name}}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{publisher_logo}}"
+      }
+    }
+  },
+  "BreadcrumbList": {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "{{level1_name}}",
+        "item": "{{level1_url}}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{level2_name}}",
+        "item": "{{level2_url}}"
+      }
+    ]
+  },
+  "WebSite": {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{site_name}}",
+    "url": "{{site_url}}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "{{site_url}}/?s={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  },
+  "FAQPage": {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "{{question_1}}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{{answer_1}}"
+        }
+      }
+    ],
+    "_note": "RESTRICTED: Only use on government or health authority sites since Aug 2023"
+  },
+  "VideoObject": {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "{{title}}",
+    "description": "{{description}}",
+    "thumbnailUrl": "{{thumbnail_url}}",
+    "uploadDate": "{{upload_date}}",
+    "contentUrl": "{{video_url}}",
+    "embedUrl": "{{embed_url}}"
+  },
+  "ProfilePage": {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": "{{name}}",
+      "jobTitle": "{{job_title}}",
+      "url": "{{profile_url}}",
+      "image": "{{photo_url}}",
+      "sameAs": ["{{social_url}}"]
+    }
+  }
+}

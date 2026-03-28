@@ -1,0 +1,63 @@
+{
+  "name": "claude-seo-pro",
+  "version": "2.1.0",
+  "description": "Professional SEO audit & optimization plugin for Claude Code. 15 skills, 10 parallel subagents, deep crawl with 18 checks, 14-category technical audit, Yandex support, competitor analysis, and AI search readiness (GEO).",
+  "entry": "seo/SKILL.md",
+  "skills": [
+    "seo/SKILL.md",
+    "skills/seo-audit/SKILL.md",
+    "skills/seo-crawl/SKILL.md",
+    "skills/seo-page/SKILL.md",
+    "skills/seo-technical/SKILL.md",
+    "skills/seo-content/SKILL.md",
+    "skills/seo-schema/SKILL.md",
+    "skills/seo-sitemap/SKILL.md",
+    "skills/seo-images/SKILL.md",
+    "skills/seo-geo/SKILL.md",
+    "skills/seo-local/SKILL.md",
+    "skills/seo-plan/SKILL.md",
+    "skills/seo-programmatic/SKILL.md",
+    "skills/seo-competitor-pages/SKILL.md",
+    "skills/seo-hreflang/SKILL.md"
+  ],
+  "agents": [
+    "agents/seo-technical.md",
+    "agents/seo-crawl.md",
+    "agents/seo-content.md",
+    "agents/seo-schema.md",
+    "agents/seo-sitemap.md",
+    "agents/seo-performance.md",
+    "agents/seo-visual.md",
+    "agents/seo-geo.md",
+    "agents/seo-local.md"
+  ],
+  "scripts": [
+    "scripts/fetch_page.py",
+    "scripts/parse_html.py",
+    "scripts/crawl_site.py",
+    "scripts/check_links.py"
+  ],
+  "author": {
+    "name": "AgriciDaniel",
+    "url": "https://github.com/AgriciDaniel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AgriciDaniel/claude-seo-pro"
+  },
+  "license": "MIT",
+  "keywords": [
+    "seo",
+    "audit",
+    "claude-code",
+    "plugin",
+    "technical-seo",
+    "crawl",
+    "schema",
+    "e-e-a-t",
+    "core-web-vitals",
+    "yandex",
+    "geo",
+    "ai-search"
+  ]
+}
