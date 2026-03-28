@@ -38,12 +38,12 @@
     "scripts/check_links.py"
   ],
   "author": {
-    "name": "AgriciDaniel",
-    "url": "https://github.com/AgriciDaniel"
+    "name": "abdublinn",
+    "url": "https://github.com/abdublinn"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AgriciDaniel/claude-seo-pro"
+    "url": "https://github.com/abdublinn/claude-seo-pro"
   },
   "license": "MIT",
   "keywords": [

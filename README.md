@@ -47,18 +47,18 @@ Runs 10 specialized subagents in parallel and produces a unified SEO Health Scor
 
 ### Option 1: Plugin install (recommended)
 ```bash
-/plugin install https://github.com/AgriciDaniel/claude-seo-pro
+/plugin install https://github.com/abdublinn/claude-seo-pro
 ```
 
 ### Option 2: Local development
 ```bash
-git clone https://github.com/AgriciDaniel/claude-seo-pro.git
+git clone https://github.com/abdublinn/claude-seo-pro.git
 claude --plugin-dir ./claude-seo-pro
 ```
 
 ### Option 3: Manual install
 ```bash
-git clone https://github.com/AgriciDaniel/claude-seo-pro.git
+git clone https://github.com/abdublinn/claude-seo-pro.git
 cd claude-seo-pro
 
 # Linux/macOS
