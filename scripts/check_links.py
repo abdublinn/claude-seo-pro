@@ -19,12 +19,21 @@ import sys
 from collections import defaultdict
 from urllib.parse import urlparse
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 
 def _normalize(url):
-    """Normalize URL for comparison."""
-    return url.rstrip("/") if url else ""
+    """Normalize URL for comparison (v2.2: handle www, protocol, case)."""
+    if not url:
+        return ""
+    parsed = urlparse(url.lower())
+    host = parsed.hostname or ""
+    host = host.removeprefix("www.")
+    path = parsed.path.rstrip("/") or "/"
+    normalized = f"{parsed.scheme}://{host}{path}"
+    if parsed.query:
+        normalized += f"?{parsed.query}"
+    return normalized
 
 
 def _trace_redirect_chain(url, url_redirects, max_depth=10):
@@ -179,8 +188,23 @@ def check_links(crawl_file, timeout=10):
     for d in dead_ends[:10]:
         print(f"  {d}")
 
-    # === Canonical validation (NEW v2.1) ===
-    missing_canonical = [p["url"] for p in html_pages if not p.get("canonical")]
+    # === Canonical validation (v2.2: conditional logic + canonical_in_body) ===
+    # Only flag missing canonical on pages where it matters:
+    # - pages with query params (need canonical to consolidate)
+    # - indexable pages (noindex pages don't need canonical)
+    missing_canonical_all = [p["url"] for p in html_pages if not p.get("canonical")]
+    missing_canonical = []
+    for p in html_pages:
+        if p.get("canonical"):
+            continue
+        has_params = bool(urlparse(p["url"]).query)
+        is_indexable = "noindex" not in (p.get("meta_robots") or "").lower()
+        if has_params and is_indexable:
+            missing_canonical.append(p["url"])
+
+    # Canonical in <body> instead of <head> (v2.2)
+    canonical_in_body = [p["url"] for p in html_pages if p.get("canonical_in_body")]
+
     self_canonical = []
     non_self_canonical = []
     broken_canonical_targets = []
@@ -212,7 +236,12 @@ def check_links(crawl_file, timeout=10):
 
     print(f"\n=== Canonical Validation ===")
     print(f"  Self-referencing (correct): {len(self_canonical)}")
-    print(f"  Missing canonical: {len(missing_canonical)}")
+    print(f"  Missing canonical (all): {len(missing_canonical_all)} (INFO)")
+    print(f"  Missing canonical (needs fix — parameterized & indexable): {len(missing_canonical)} (ACTION)")
+    if canonical_in_body:
+        print(f"  ⚠ Canonical in <body> instead of <head>: {len(canonical_in_body)} (CRITICAL)")
+        for url in canonical_in_body[:5]:
+            print(f"    {url}")
     print(f"  Non-self canonical: {len(non_self_canonical)}")
     for ns in non_self_canonical[:5]:
         print(f"    {ns['url']} → {ns['canonical']}")
@@ -266,7 +295,9 @@ def check_links(crawl_file, timeout=10):
         "cyclic_links": cyclic_count,
         "orphans": orphans,
         "dead_ends": dead_ends,
-        "missing_canonical": len(missing_canonical),
+        "missing_canonical_all": len(missing_canonical_all),
+        "missing_canonical_actionable": len(missing_canonical),
+        "canonical_in_body": len(canonical_in_body),
         "non_self_canonical": non_self_canonical,
         "broken_canonical_targets": broken_canonical_targets,
         "canonical_chains": canonical_chains,

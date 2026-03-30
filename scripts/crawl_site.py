@@ -19,7 +19,7 @@ import time
 from collections import defaultdict
 from urllib.parse import urljoin, urlparse
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 
 def check_dependencies():
@@ -139,6 +139,7 @@ def extract_page_data(url, resp, soup, base_domain):
         "h1": None,
         "h1_all": [],
         "canonical": None,
+        "canonical_in_body": False,
         "meta_robots": None,
         "word_count": 0,
         "og_title": None,
@@ -165,16 +166,21 @@ def extract_page_data(url, resp, soup, base_domain):
     if desc_tag and desc_tag.get("content"):
         data["description"] = desc_tag["content"].strip()
 
-    # H1
-    h1_tags = soup.find_all("h1")
+    # H1 — filter out h1 inside code/pre/svg/template (v2.2 fix: false positives)
+    EXCLUDE_PARENTS = {"code", "pre", "svg", "template", "script", "style"}
+    h1_tags = [
+        h for h in soup.find_all("h1")
+        if not any(p.name in EXCLUDE_PARENTS for p in h.parents)
+    ]
     data["h1_all"] = [h.get_text(strip=True) for h in h1_tags]
     if h1_tags:
         data["h1"] = h1_tags[0].get_text(strip=True)
 
-    # Canonical
+    # Canonical — detect if placed in <body> instead of <head> (v2.2)
     canonical_tag = soup.find("link", attrs={"rel": "canonical"})
     if canonical_tag and canonical_tag.get("href"):
         data["canonical"] = canonical_tag["href"].strip()
+        data["canonical_in_body"] = canonical_tag.find_parent("head") is None
 
     # Meta robots
     robots_tag = soup.find("meta", attrs={"name": re.compile(r"robots", re.I)})
@@ -194,21 +200,41 @@ def extract_page_data(url, resp, soup, base_domain):
     if og_img and og_img.get("content"):
         data["og_image"] = og_img["content"].strip()
 
-    # Word count + text/HTML ratio (ENHANCED v2.1)
+    # Word count + text/HTML ratio (v2.2: exclude script/style from denominator)
     body = soup.find("body")
     if body:
+        # Remove script/style tags before extracting text
+        body_copy = body.__copy__() if hasattr(body, '__copy__') else body
+        for tag in body.find_all(["script", "style"]):
+            tag.decompose()
         text = body.get_text(separator=" ", strip=True)
         text_length = len(text.encode("utf-8"))
         words = [w for w in text.split() if len(w) > 1]
         data["word_count"] = len(words)
         data["text_length"] = text_length
-        if html_size > 0:
-            data["text_html_ratio"] = round(text_length / html_size * 100, 1)
+        # Use markup size excluding inline scripts/styles for fairer ratio
+        markup_size = html_size
+        for script in soup.find_all("script"):
+            if script.string:
+                markup_size -= len(script.string.encode("utf-8"))
+        for style in soup.find_all("style"):
+            if style.string:
+                markup_size -= len(style.string.encode("utf-8"))
+        if markup_size > 0:
+            data["text_html_ratio"] = round(text_length / markup_size * 100, 1)
 
-    # Links
+    # Links — with img alt and aria-label fallback for anchor text (v2.2 fix)
     for a_tag in soup.find_all("a", href=True):
         href = a_tag["href"].strip()
         anchor = a_tag.get_text(strip=True)
+        if not anchor:
+            img = a_tag.find("img", alt=True)
+            if img and img["alt"].strip():
+                anchor = img["alt"].strip()
+        if not anchor:
+            anchor = a_tag.get("aria-label", "").strip()
+        if not anchor:
+            anchor = a_tag.get("title", "").strip()
         full_url = urljoin(url, href)
         parsed = urlparse(full_url)
 
@@ -496,14 +522,25 @@ def analyze(result):
     for p in sorted(large_html, key=lambda x: x.get("html_size", 0), reverse=True)[:5]:
         print(f"  {p.get('html_size', 0) // 1024}KB — {p['url']}")
 
-    # --- Canonical validation (NEW v2.1) ---
-    missing_canonical = [p for p in html_pages if not p.get("canonical")]
+    # --- Canonical validation (UPDATED v2.2) ---
+    missing_canonical_all = [p for p in html_pages if not p.get("canonical")]
+    missing_canonical_action = [
+        p for p in missing_canonical_all
+        if bool(urlparse(p["url"]).query)
+        and "noindex" not in (p.get("meta_robots") or "").lower()
+    ]
+    canonical_in_body = [p for p in html_pages if p.get("canonical_in_body")]
     non_self_canonical = []
     for p in html_pages:
         if p.get("canonical") and p["canonical"].rstrip("/") != p["url"].rstrip("/"):
             non_self_canonical.append(p)
     print(f"\n=== Canonical Validation ===")
-    print(f"  Missing canonical: {len(missing_canonical)}")
+    print(f"  Missing canonical (total, INFO): {len(missing_canonical_all)}")
+    print(f"  Missing canonical (actionable): {len(missing_canonical_action)}")
+    if canonical_in_body:
+        print(f"  Canonical in <body> (CRITICAL): {len(canonical_in_body)}")
+        for p in canonical_in_body[:5]:
+            print(f"    {p['url']}")
     print(f"  Non-self canonical: {len(non_self_canonical)}")
     for p in non_self_canonical[:5]:
         print(f"  {p['url']} → {p['canonical']}")

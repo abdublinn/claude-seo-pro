@@ -1,8 +1,20 @@
-# Crawl Health Checklist — v2.1 Reference
+# Crawl Health Checklist — v2.2 Reference
+
+## Severity Levels (NEW v2.2)
+
+| Level | Meaning | Action |
+|-------|---------|--------|
+| CRITICAL | Blocks indexing or breaks UX | Fix immediately |
+| HIGH | Significant SEO impact | Fix within 1-2 weeks |
+| MEDIUM | Moderate impact | Fix in normal workflow |
+| LOW | Minor improvement | Fix when convenient |
+| INFO | Context-dependent or informational | Review, may not need action |
+
+**v2.2 change:** Added INFO level for findings that depend on site architecture (e.g., text/HTML ratio on SSR sites, missing canonical on pages without duplicates).
 
 ## Scoring Rubric
 
-Each metric is scored 0-100. The Crawl Health Score is the weighted average of all 13 metrics (8 original + 5 new in v2.1).
+Each metric is scored 0-100. The Crawl Health Score is the weighted average of all 13 metrics (8 original + 5 new in v2.1, updated in v2.2).
 
 ### 1. Broken Internal Links (404/410/5xx)
 
@@ -78,6 +90,7 @@ Same rubric as Duplicate Titles.
 
 **Impact**: Screen readers can't navigate. Crawlers get no anchor text signal.
 **Fix**: Add `aria-label` or visible text. For icon-only links, use `aria-label="icon description"`.
+**v2.2 note**: Links containing images with alt text, or links with `aria-label`/`title` attributes are no longer counted as empty. Only truly text-free links are flagged.
 
 ### 7. Cyclic Links (Self-referencing)
 
@@ -120,7 +133,7 @@ Same rubric as Duplicate Titles.
 **Important**: Do NOT count bot-blocks (403 from Wildberries, 498 from marketplace APIs) as broken. Only count real 404/410/5xx on external sites.
 **Fix**: Replace broken external links with working alternatives or remove them.
 
-### 10. Text/HTML Ratio (NEW v2.1)
+### 10. Text/HTML Ratio (UPDATED v2.2)
 
 | % pages with ratio >10% | Score | Priority |
 |--------------------------|-------|----------|
@@ -128,7 +141,12 @@ Same rubric as Duplicate Titles.
 | >80% | 80 | LOW |
 | >60% | 60 | MEDIUM |
 | >40% | 40 | HIGH |
-| <40% | 20 | CRITICAL |
+| <40% | 20 | HIGH |
+
+**v2.2 changes:**
+- Ratio now excludes inline `<script>` and `<style>` content from HTML size denominator.
+- For JS/SSR sites (React, Next.js, Nuxt), ratio 5-10% is expected — flag as INFO, not CRITICAL.
+- Only flag as CRITICAL if ratio <5% AND word count <100 (truly thin content).
 
 **Impact**: Very low text/HTML ratio signals boilerplate-heavy pages. Google may treat as thin content.
 **Fix**: Reduce inline CSS/JS, remove unnecessary markup, add more textual content.
@@ -146,18 +164,24 @@ Same rubric as Duplicate Titles.
 **Impact**: Large HTML slows TTFB and parsing. Pages >500KB may timeout for slow connections.
 **Fix**: Paginate long lists, defer non-critical content, optimize inline resources.
 
-### 12. Canonical Validation (NEW v2.1)
+### 12. Canonical Validation (UPDATED v2.2)
 
 | Issues | Score | Priority |
 |--------|-------|----------|
-| 0 | 100 | — |
+| 0 actionable issues | 100 | — |
 | 1-2 non-self | 80 | MEDIUM |
-| 3-5 non-self or missing >5% | 60 | HIGH |
-| Canonical target returns 404 | 20 | CRITICAL |
+| 3-5 actionable missing | 60 | HIGH |
+| Canonical in `<body>` | 20 | CRITICAL |
+| Canonical target returns 404 | 0 | CRITICAL |
 | Canonical chains | 40 | HIGH |
 
+**v2.2 changes:**
+- Missing canonical is only actionable if page has URL parameters AND is indexable (no noindex). Pages without params don't need canonical — reported as INFO.
+- NEW: Canonical tag in `<body>` instead of `<head>` is flagged as CRITICAL — search engines may ignore it.
+- Total missing canonical count is reported as INFO for transparency.
+
 **Impact**: Wrong canonicals can de-index pages or consolidate ranking to wrong URL.
-**Fix**: Ensure every page has self-referencing canonical. Fix targets that return non-200.
+**Fix**: Fix canonical in `<body>` (move to `<head>`). Add canonical to parameterized indexable pages. Fix targets that return non-200.
 
 ### 13. OG Tag Coverage (NEW v2.1)
 

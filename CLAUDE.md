@@ -1,14 +1,14 @@
-# claude-seo-pro v2.1.0
+# claude-seo-pro v2.2.0
 
 ## Project Overview
-Enhanced SEO audit skill for Claude Code. Based on claude-seo v1.6.0 → v2.0.0 → v2.1.0. Major improvements in crawl depth, agent ownership, and methodology accuracy.
+Enhanced SEO audit skill for Claude Code. Based on claude-seo v1.6.0 → v2.0.0 → v2.1.0 → v2.2.0. Major improvements in crawl depth, agent ownership, methodology accuracy, and false positive reduction.
 
 ## Architecture
 - `seo/SKILL.md` — Main orchestrator, routes `/seo <command>` to sub-skills
 - `skills/` — 14 sub-skills (each with SKILL.md)
 - `agents/` — 10 subagents for parallel audit (9 + competitor)
-- `scripts/` — Python scripts for crawling and parsing (v2.1)
-- `seo/references/` — On-demand knowledge files (7 reference docs, updated v2.1)
+- `scripts/` — Python scripts for crawling and parsing (v2.2)
+- `seo/references/` — On-demand knowledge files (7 reference docs, updated v2.2)
 
 ## Key Commands
 - `/seo audit <url>` — Full audit with 10 parallel subagents
@@ -66,6 +66,18 @@ Enhanced SEO audit skill for Claude Code. Based on claude-seo v1.6.0 → v2.0.0 
 | robots.txt, security, Yandex, sitemap↔crawl | seo-technical | seo-crawl |
 | CWV measurements | seo-performance | seo-technical (flags only) |
 
+## What's New in v2.2
+
+### False Positive Reduction
+- H1 detection now filters out `<h1>` inside `<code>`, `<pre>`, `<svg>`, `<template>` elements
+- Empty links: fallback chain text → img alt → aria-label → title (reduces false empties by ~70%)
+- Canonical: missing canonical only flagged as ACTION on parameterized + indexable pages
+- NEW: Canonical in `<body>` detection (real bug, was previously invisible)
+- Text/HTML ratio: excludes inline script/style from denominator; INFO level for JS/SSR sites
+- URL normalization: handles www/non-www, protocol, case differences
+- rel=prev/next: removed as recommendation (deprecated by Google since 2019)
+- Added INFO severity level for context-dependent findings
+
 ## Quality Rules
 - All scores are 0-100
 - Crawl data must use exact counts (never estimates)
@@ -75,3 +87,4 @@ Enhanced SEO audit skill for Claude Code. Based on claude-seo v1.6.0 → v2.0.0 
 - TTFB: always report cached + uncached
 - External 403/498 from marketplaces ≠ site errors
 - If Python deps missing → accuracy warning in report header
+- v2.2: Use INFO level for findings that depend on site architecture

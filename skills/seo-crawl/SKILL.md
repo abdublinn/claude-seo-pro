@@ -122,6 +122,8 @@ Group pages by identical `<title>`. For each duplicate group:
 
 Same format as 2.4 but for `<h1>`.
 
+**v2.2**: The crawler filters out `<h1>` tags inside `<code>`, `<pre>`, `<svg>`, `<template>`, `<script>`, `<style>` elements. These are code examples, not actual page headings. Only structural H1 tags in the page layout are counted.
+
 **Common causes:** Archive/category pages sharing template H1, blog pagination.
 
 #### 2.6. Missing Meta Description
@@ -170,7 +172,7 @@ For each, check HTTP status. Flag any returning 404/410.
 
 #### 2.9. Empty Anchor Links
 
-Find all `<a>` tags where the visible text content is empty (no text, only icons/images without alt).
+Find all `<a>` tags where the visible text content is empty. **v2.2**: The crawler now uses fallback chain: `text → img alt → aria-label → title`. Only links with NO text after all fallbacks are counted as empty.
 
 ```markdown
 Total empty anchors: N
@@ -180,6 +182,7 @@ Pages with most empty anchors:
 
 **Impact:** Screen readers can't navigate, crawlers get no anchor signal.
 **Fix:** Add `aria-label` or visible text to each link.
+**Note:** Links with images that have alt text, or links with `aria-label`/`title` attributes are NOT empty — this is a valid accessibility pattern (e.g., image card linking to an article alongside a text link).
 
 #### 2.10. Cyclic Links (Self-referencing)
 
@@ -296,6 +299,10 @@ Pages with critically low ratio (<10%):
 - >20% = 40
 - <20% = 20
 
+**v2.2 change:** The ratio now excludes inline `<script>` and `<style>` content from the HTML size denominator, giving a fairer ratio for JS/SSR sites. Sites with heavy inline JS (React SSR, Next.js) will see significantly improved ratios.
+
+**Context matters:** For SPA/SSR sites, a ratio of 5-10% may be normal due to framework boilerplate. Flag as INFO, not as an error. Only flag as HIGH/CRITICAL if the page also has low word count (<100 words).
+
 **Impact:** Google may treat very low ratio pages as thin content regardless of word count.
 
 #### 2.15. HTML Document Size (NEW v2.1)
@@ -325,14 +332,16 @@ Top 10 largest HTML pages:
 
 **Fix:** Reduce inline CSS/JS, paginate long product lists, lazy-load non-critical content.
 
-#### 2.16. Canonical Validation (NEW v2.1)
+#### 2.16. Canonical Validation (UPDATED v2.2)
 
 For each page, validate the `<link rel="canonical">` tag:
 
 ```markdown
 Canonical status:
 - Self-referencing canonical (correct): N (X%)
-- Missing canonical: N (X%)
+- Missing canonical (total): N (INFO — not all pages need canonical)
+- Missing canonical (actionable — parameterized & indexable): N (ACTION)
+- Canonical in <body> instead of <head>: N (CRITICAL — browsers may ignore)
 - Non-self canonical (points elsewhere): N — review each
 - Canonical target returns non-200: N — CRITICAL
 - Canonical chains (A→B→C): N — flag
@@ -341,11 +350,15 @@ Non-self canonical pages:
 | Page URL | Canonical points to | Target status | Action |
 ```
 
+**v2.2 changes:**
+- Missing canonical is only flagged as ACTION if the page has URL parameters AND is indexable (no noindex). Pages without params or with noindex don't need canonical.
+- NEW: Detect canonical tag placed in `<body>` instead of `<head>` — this is a real bug that causes search engines to ignore the tag.
+
 **Scoring:**
 - 0 issues = 100
 - 1-2 non-self = 80
-- 3-5 = 60
-- Missing canonical on >10% = 40
+- 3-5 actionable missing = 60
+- Canonical in body = 20 (CRITICAL)
 - Canonical target 404 = 0 (CRITICAL)
 
 #### 2.17. Orphan Pages (NEW v2.1)

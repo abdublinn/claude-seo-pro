@@ -49,7 +49,7 @@ You are a technical SEO specialist. Analyze the site across 14 categories and pr
 - **Meta robots**: Check for unintended `noindex`, `nofollow`.
 - **Canonical tags**: Self-referencing canonicals, cross-domain canonicals, missing canonicals.
 - **NEW v2.0 — Non-indexable pages**: Count pages with `noindex` or non-200 status. Flag if >5% of HTML pages are non-indexable unintentionally.
-- **Pagination**: Check `rel="prev"/"next"` (deprecated but still useful for discovery). **NEW v2.0**: Verify all `/page/N/` URLs return 200.
+- **Pagination**: **v2.2 update**: `rel="prev"/"next"` is deprecated by Google since March 2019 and no longer used for indexing signals. Do NOT recommend adding it. Instead check: (1) all `/page/N/` URLs return 200, (2) paginated pages have proper canonical pointing to themselves (not to page 1 — self-referencing canonical is correct for pagination), (3) paginated pages are not noindexed (common Yoast misconfiguration).
 - **Thin content pages in index**: Pages with <100 words that are indexable.
 
 ### 3. Security (weight: 10%)

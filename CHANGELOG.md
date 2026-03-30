@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.2.0] - 2026-03-30
+
+### Fixed (False Positive Reduction)
+- **H1 counting** — `<h1>` inside `<code>`, `<pre>`, `<svg>`, `<template>`, `<script>`, `<style>` are now excluded from H1 analysis. Eliminates false "multiple H1" reports on pages with code examples.
+- **Empty anchor detection** — Added fallback chain: text → img alt → aria-label → title attribute. Links with images (alt text) or accessibility attributes are no longer falsely flagged as empty.
+- **Canonical missing** — No longer flags missing canonical as an error on all pages. Only flags as ACTION on parameterized (`?page=`, `?sort=`) AND indexable (no noindex) pages. Other missing canonicals reported as INFO.
+- **Text/HTML ratio** — Excludes inline `<script>` and `<style>` content from HTML size denominator. JS/SSR sites (React, Next.js, Nuxt) will see fairer ratios. Ratio 5-10% on SSR sites is now INFO, not CRITICAL.
+- **URL normalization** — `_normalize()` now handles www/non-www, http/https protocol differences, and URL case. Prevents false duplicate detection.
+- **rel=prev/next** — Removed as a recommendation in seo-technical. Google deprecated rel=prev/next in March 2019; recommending it was outdated advice.
+
+### Added
+- **INFO severity level** — New level for context-dependent findings that may not require action (architecture-specific ratios, optional canonical on simple pages)
+- **Canonical in `<body>` detection** — Detects when `<link rel="canonical">` is placed in `<body>` instead of `<head>` — a real bug that causes search engines to ignore the tag. Flagged as CRITICAL.
+- **`canonical_in_body` field** in crawl data — boolean flag per page
+
+### Changed
+- crawl_site.py v2.1→v2.2: H1 filtering, anchor text fallbacks, canonical position detection, text/HTML ratio calculation
+- check_links.py v2.1→v2.2: improved URL normalization, conditional canonical logic, canonical_in_body reporting
+- crawl-checklist.md v2.1→v2.2: updated scoring for canonical, text/HTML ratio, empty anchors
+- quality-gates.md v2.1→v2.2: context-aware text/HTML ratio thresholds
+- seo-crawl SKILL.md: updated sections 2.5 (H1), 2.9 (empty anchors), 2.14 (text/HTML), 2.16 (canonical)
+- seo-technical SKILL.md: pagination section updated — no longer recommends rel=prev/next
+
 ## [2.1.0] - 2026-03-28
 
 ### Added

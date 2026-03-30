@@ -1,4 +1,4 @@
-# Content Quality Gates — Minimum Thresholds (v2.1)
+# Content Quality Gates — Minimum Thresholds (v2.2)
 
 ## Minimum Word Count by Page Type
 
@@ -62,15 +62,17 @@
 | 200-500 KB | Very large — optimize |
 | >500 KB | Critical — will impact TTFB |
 
-## Text/HTML Ratio (NEW v2.1)
+## Text/HTML Ratio (UPDATED v2.2)
 
 | Ratio | Rating |
 |-------|--------|
 | >40% | Excellent |
 | 25-40% | Good |
 | 10-25% | Acceptable |
-| 5-10% | Low — flag for review |
-| <5% | Critical — likely boilerplate-heavy |
+| 5-10% | Low — INFO for JS/SSR sites, flag for static sites |
+| <5% | Critical only if word count <100; otherwise INFO for JS/SSR |
+
+**v2.2 note:** Ratio now excludes inline script/style content from denominator. For SPA/SSR sites (React, Next.js, Nuxt), 5-10% is architecturally normal.
 
 ## Open Graph Coverage (NEW v2.1)
 
